@@ -1,45 +1,47 @@
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
 
-#define MAX_LEN 255
-#define SHIFT 3
+#define MAX_SIZE 100
 
-const char ALPHABET[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz[]()+-*/=&?!\\\"’:;@.,";
-const int ALPHABET_SIZE = sizeof(ALPHABET) - 1;
+short arr[MAX_SIZE];
 
-int find_char_in_alphabet(char ch) {
-    for (int i = 0; i < ALPHABET_SIZE; i++) {
-        if (ALPHABET[i] == ch) {
-            return i;
+int count_unique(int size) {
+    int count = 0;
+    for (int i = 0; i < size; i++) {
+        int is_unique = 1;
+        for (int j = 0; j < i; j++) {
+            if (arr[i] == arr[j]) {
+                is_unique = 0;
+                break;
+            }
+        }
+        if (is_unique) {
+            count++;
         }
     }
-    return -1;
-}
-
-void caesar_cipher(char str[]) {
-    int i = 0;
-    while (str[i] != '\0') {
-        int pos = find_char_in_alphabet(str[i]);
-        if (pos != -1) {
-            str[i] = ALPHABET[(pos + SHIFT) % ALPHABET_SIZE];
-        }
-        i++;
-    }
+    return count;
 }
 
 int main() {
-    char str[MAX_LEN];
-    
-    printf("Enter a string: ");
-    fgets(str, MAX_LEN, stdin);
-    
-    str[strcspn(str, "\n")] = 0;
-    
-    caesar_cipher(str);
-    printf("Encrypted string: %s\n", str);
+    int size;
+    char input[20];
 
-    char exitKey;
-    printf("Press 'q' to exit...\n");
-    while ((exitKey = getchar()) != 'q');
+    printf("Enter array size: ");
+    if (!fgets(input, sizeof(input), stdin) || sscanf(input, "%d", &size) != 1 || size <= 0 || size > MAX_SIZE) {
+        printf("Error: incorrect array size\n");
+        return 1;
+    }
+
+    printf("Enter array elements:\n");
+    for (int i = 0; i < size; i++) {
+        if (!fgets(input, sizeof(input), stdin) || sscanf(input, "%hd", &arr[i]) != 1) {
+            printf("Error: incorrect array element.\n");
+            return 1;
+        }
+    }
+
+    int unique_count = count_unique(size);
+    printf("Number of unique elements: %d\n", unique_count);
+    
     return 0;
 }

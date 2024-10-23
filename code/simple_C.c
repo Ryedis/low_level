@@ -1,67 +1,57 @@
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
 
-#define MAX_LEN 255
-#define SHIFT 3
+#define MAX_SIZE 100
 
-const char ALPHABET[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz[]()+-*/=&?!\\\"’:;@.,";
-const int ALPHABET_SIZE = sizeof(ALPHABET) - 1;
+short arr[MAX_SIZE];
 
-int find_char_in_alphabet(char ch) {
-    int i;
-    i = 0;
+int count_unique(int size) {
+    int i = 0, j = 0, count = 0, is_unique = 1;
     
-find_loop_start:
-    if (i >= ALPHABET_SIZE) goto not_found;
-    if (ALPHABET[i] == ch) goto found;
+    while (i < size) {
+        is_unique = 1;
+        j = 0;
+        
+        while (j < i) {
+            if (arr[i] == arr[j]) goto not_unique;
+            j++;
+        }
+        
+        count++;
+        goto end_check;
+        
+    not_unique:
+        is_unique = 0;
+        
+    end_check:
+        i++;
+    }
     
-    i = i + 1;
-    goto find_loop_start;
-
-found:
-    return i;
-
-not_found:
-    return -1;
-}
-
-void caesar_cipher(char str[]) {
-    int i, pos;
-    i = 0;
-
-cipher_loop_start:
-    if (str[i] == '\0') goto cipher_done;
-
-    pos = find_char_in_alphabet(str[i]);
-
-    if (pos == -1) goto skip_char;
-
-    pos = pos + SHIFT;
-    pos = pos % ALPHABET_SIZE;
-
-    str[i] = ALPHABET[pos];
-
-skip_char:
-    i = i + 1;
-    goto cipher_loop_start;
-
-cipher_done:
-    return;
+    return count;
 }
 
 int main() {
-    char str[MAX_LEN];
+    int size;
+    char input[20];
+   
+    printf("Enter array size: ");
+    if (!fgets(input, sizeof(input), stdin) || sscanf(input, "%d", &size) != 1 || size <= 0 || size > MAX_SIZE) {
+        printf("Error: incorrect array size.\n");
+        return 1;
+    }
     
-    printf("Enter a string: ");
-    fgets(str, MAX_LEN, stdin);
+    printf("Enter array elements:\n");
+    int i = 0;
+    while (i < size) {
+        if (!fgets(input, sizeof(input), stdin) || sscanf(input, "%hd", &arr[i]) != 1) {
+            printf("Error: incorrect array element.\n");
+            return 1;
+        }
+        i++;
+    }
     
-    str[strcspn(str, "\n")] = 0;
+    int unique_count = count_unique(size);
+    printf("Number of unique elements: %d\n", unique_count);
     
-    caesar_cipher(str);
-    printf("Encrypted string: %s\n", str);
-
-    char exitKey;
-    printf("Press 'q' to exit...\n");
-    while ((exitKey = getchar()) != 'q');
     return 0;
 }

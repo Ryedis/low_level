@@ -7,6 +7,7 @@ section .data
     format_int db "%d", 0
     format_short db "%hd", 0
     format_char db "%c", 0
+    clear_buffer_format db "%*s", 0
 
 section .bss
     arr resw 100
@@ -22,21 +23,44 @@ section .text
     global main
 
 main:
-    ; Enter array size
+input_size:
     push prompt_size
     call printf
     add esp, 4
-    
+
     push arr_size
     push format_int
     call scanf
     add esp, 8
+
+    ; Check correct input
+    cmp eax, 1
+    jne clear_input_buffer_size
 
     cmp dword [arr_size], 0
     jle error_size_input
     cmp dword [arr_size], 100
     jg error_size_input
 
+    jmp elements_input
+
+clear_input_buffer_size:
+    push clear_buffer_format
+    call scanf
+    add esp, 4
+
+    push error_size
+    call printf
+    add esp, 4
+    jmp input_size
+
+error_size_input:
+    push error_size
+    call printf
+    add esp, 4
+    jmp main
+
+elements_input:
     ; Enter array elements
     push prompt_elements
     call printf
@@ -61,22 +85,32 @@ input_loop:
 
     ; Check correct input
     cmp eax, 1
-    jne error_element_input
+    jne clear_input_buffer
+
+    mov ax, word [ebx]
+    cmp ax, -32768
+    jl error_element_input
+    cmp ax, 32767
+    jg error_element_input
 
     inc dword [i]
     jmp input_loop
 
-error_size_input:
-    push error_size
+clear_input_buffer:
+    push clear_buffer_format
+    call scanf
+    add esp, 4
+
+    push error_element
     call printf
     add esp, 4
-    jmp end_program
+    jmp elements_input
 
 error_element_input:
     push error_element
     call printf
     add esp, 4
-    jmp end_program
+    jmp elements_input
 
 end_input:
     ; Counting unique elements
